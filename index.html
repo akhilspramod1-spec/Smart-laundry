@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Laundry — Smarter Clothes Care</title>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --yellow: #FFD600;
+    --blue: #1565C0;
+    --dark: #0D0D0D;
+    --white: #FFFFFF;
+    --gray: #F5F5F0;
+    --text: #1A1A1A;
+    --muted: #666;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+  body { font-family:'DM Sans',sans-serif; background:#fff; color:var(--text); }
+  h1,h2,h3,h4 { font-family:'Syne',sans-serif; }
+
+  /* LANDING PAGE ANIMATIONS */
+  @keyframes fadeUp { from{opacity:0;transform:translateY(40px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  @keyframes slideRight { from{opacity:0;transform:translateX(-40px)} to{opacity:1;transform:translateX(0)} }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-18px)} }
+  @keyframes pulse-ring { 0%{transform:scale(1);opacity:1} 100%{transform:scale(1.6);opacity:0} }
+  @keyframes marquee { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+  @keyframes spin-slow { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+  @keyframes count { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+  .fade-up { animation:fadeUp 0.7s ease-out forwards; }
+  .fade-up-d1 { animation:fadeUp 0.7s 0.1s ease-out both; }
+  .fade-up-d2 { animation:fadeUp 0.7s 0.2s ease-out both; }
+  .fade-up-d3 { animation:fadeUp 0.7s 0.3s ease-out both; }
+  .fade-up-d4 { animation:fadeUp 0.7s 0.4s ease-out both; }
+  .floating { animation:float 3.5s ease-in-out infinite; }
+
+  /* NAVBAR */
+  .navbar { position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:2px solid var(--yellow); }
+
+  /* HERO */
+  .hero { background:var(--yellow);min-height:100vh;display:flex;align-items:center;padding-top:72px;position:relative;overflow:hidden; }
+  .hero::before { content:'';position:absolute;top:-100px;right:-100px;width:600px;height:600px;background:rgba(21,101,192,0.08);border-radius:50%; }
+  .hero::after { content:'';position:absolute;bottom:-150px;left:-80px;width:400px;height:400px;background:rgba(0,0,0,0.04);border-radius:50%; }
+  .hero-badge { display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:white;padding:6px 16px;border-radius:50px;font-size:13px;font-weight:600;margin-bottom:24px; }
+  .hero-badge::before { content:'';width:8px;height:8px;background:#4CF;border-radius:50%;animation:pulse-ring 1.5s infinite; }
+
+  /* MARQUEE STRIP */
+  .marquee-track { overflow:hidden;background:var(--dark);padding:14px 0; }
+  .marquee-inner { display:flex;gap:40px;white-space:nowrap;animation:marquee 25s linear infinite; }
+  .marquee-item { color:var(--yellow);font-family:'Syne',sans-serif;font-weight:700;font-size:15px;display:flex;align-items:center;gap:16px; }
+  .marquee-dot { width:6px;height:6px;background:white;border-radius:50; }
+
+  /* WHY SECTION */
+  .why-card { background:white;border:2px solid #eee;border-radius:20px;padding:32px 28px;transition:all 0.3s ease;position:relative;overflow:hidden; }
+  .why-card::before { content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--yellow);transform:scaleX(0);transition:transform 0.3s; }
+  .why-card:hover { border-color:var(--yellow);transform:translateY(-6px);box-shadow:0 20px 40px rgba(0,0,0,0.1); }
+  .why-card:hover::before { transform:scaleX(1); }
+  .why-icon { width:60px;height:60px;background:var(--yellow);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:20px; }
+
+  /* SERVICES */
+  .service-card { border-radius:20px;padding:36px 28px;color:white;position:relative;overflow:hidden;cursor:pointer;transition:all 0.3s ease; }
+  .service-card:hover { transform:translateY(-8px) scale(1.02);box-shadow:0 25px 50px rgba(0,0,0,0.2); }
+  .service-card::after { content:'→';position:absolute;bottom:24px;right:24px;font-size:22px;font-weight:700;opacity:0.6; }
+
+  /* STATS STRIP */
+  .stat-item { text-align:center;padding:40px 20px; }
+  .stat-num { font-family:'Syne',sans-serif;font-size:52px;font-weight:800;color:var(--yellow);line-height:1; }
+  .stat-label { color:rgba(255,255,255,0.7);font-size:14px;margin-top:6px; }
+
+  /* HOW IT WORKS */
+  .step-num { width:56px;height:56px;background:var(--yellow);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:22px;color:var(--dark);flex-shrink:0; }
+  .step-line { width:2px;height:40px;background:linear-gradient(to bottom,var(--yellow),transparent);margin:4px 0 4px 27px; }
+
+  /* TESTIMONIALS */
+  .review-card { background:white;border:2px solid #eee;border-radius:20px;padding:28px;transition:all 0.3s ease; }
+  .review-card:hover { border-color:var(--yellow);box-shadow:0 15px 30px rgba(0,0,0,0.08); }
+  .stars { color:var(--yellow);letter-spacing:2px;font-size:16px;margin-bottom:12px; }
+
+  /* CTA BAND */
+  .cta-band { background:var(--dark);position:relative;overflow:hidden; }
+  .cta-band::before { content:'';position:absolute;top:-200px;right:-200px;width:500px;height:500px;background:var(--yellow);opacity:0.06;border-radius:50%; }
+
+  /* FOOTER */
+  footer { background:#111;color:#aaa;border-top:4px solid var(--yellow); }
+
+  /* AUTH MODAL OVERLAY */
+  .auth-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px; }
+  @keyframes modalIn { from{opacity:0;transform:scale(0.9) translateY(20px)} to{opacity:1;transform:scale(1) translateY(0)} }
+  .auth-modal { animation:modalIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+
+  /* APP VIEWS */
+  .app-view { min-height:100vh;background:#F8F9FF;padding-top:72px; }
+
+  /* BOOKING CARD */
+  .item-card { background:white;border-radius:16px;border:2px solid #eee;padding:20px;transition:all 0.2s ease; }
+  .item-card:hover { border-color:var(--yellow);box-shadow:0 8px 24px rgba(0,0,0,0.08); }
+
+  /* SERVICE BTN */
+  .svc-btn { padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;border:2px solid #ddd;background:white;cursor:pointer;transition:all 0.2s; }
+  .svc-btn.active { border-color:var(--blue);background:var(--blue);color:white; }
+  .svc-btn:hover:not(.active) { border-color:#999; }
+  .svc-btn.disabled { opacity:0.35;cursor:not-allowed; }
+
+  /* STATUS BADGE */
+  .badge-pending { background:#FFF3CD;color:#856404;padding:4px 12px;border-radius:50px;font-size:12px;font-weight:700; }
+  .badge-processing { background:#D1ECF1;color:#0C5460;padding:4px 12px;border-radius:50px;font-size:12px;font-weight:700; }
+  .badge-completed { background:#D4EDDA;color:#155724;padding:4px 12px;border-radius:50px;font-size:12px;font-weight:700; }
+  .badge-cancelled { background:#F8D7DA;color:#721C24;padding:4px 12px;border-radius:50px;font-size:12px;font-weight:700; }
+
+  /* INVOICE */
+  .invoice-table { width:100%;border-collapse:collapse; }
+  .invoice-table th { background:#f5f5f5;padding:10px 14px;text-align:left;font-size:12px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.5px; }
+  .invoice-table td { padding:10px 14px;border-bottom:1px solid #eee;font-size:14px; }
+  .invoice-table tr:last-child td { border-bottom:none; }
+
+  /* TOAST */
+  @keyframes toastIn { from{opacity:0;transform:translateX(100px)} to{opacity:1;transform:translateX(0)} }
+  .toast { animation:toastIn 0.4s ease; z-index:9999 !important; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-track { background:#f1f1f1; }
+  ::-webkit-scrollbar-thumb { background:var(--yellow);border-radius:3px; }
+
+  /* NAV ACTIVE */
+  .nav-link { position:relative;font-weight:600;color:var(--text);transition:color 0.2s; }
+  .nav-link::after { content:'';position:absolute;bottom:-4px;left:0;right:0;height:2px;background:var(--yellow);transform:scaleX(0);transition:transform 0.2s; }
+  .nav-link.active, .nav-link:hover { color:var(--blue); }
+  .nav-link.active::after, .nav-link:hover::after { transform:scaleX(1); }
+
+  /* BTN STYLES */
+  .btn-primary { background:var(--blue);color:white;padding:14px 32px;border-radius:12px;font-weight:700;font-size:15px;border:none;cursor:pointer;transition:all 0.3s;font-family:'DM Sans',sans-serif; }
+  .btn-primary:hover { background:#1976D2;transform:translateY(-2px);box-shadow:0 8px 20px rgba(21,101,192,0.3); }
+  .btn-primary:disabled { opacity:0.6;cursor:not-allowed;transform:none; }
+  .btn-yellow { background:var(--yellow);color:var(--dark);padding:14px 32px;border-radius:12px;font-weight:700;font-size:15px;border:none;cursor:pointer;transition:all 0.3s;font-family:'DM Sans',sans-serif; }
+  .btn-yellow:hover { background:#FFC200;transform:translateY(-2px);box-shadow:0 8px 20px rgba(255,214,0,0.4); }
+  .btn-outline { background:transparent;color:var(--dark);padding:13px 32px;border-radius:12px;font-weight:700;font-size:15px;border:2px solid var(--dark);cursor:pointer;transition:all 0.3s;font-family:'DM Sans',sans-serif; }
+  .btn-outline:hover { background:var(--dark);color:white; }
+
+  /* INPUT */
+  .inp { width:100%;padding:12px 16px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s; }
+  .inp:focus { border-color:var(--blue); }
+  .inp-label { display:block;font-size:13px;font-weight:600;color:#555;margin-bottom:6px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+const API = 'http://localhost:5000/api';
+const GST_RATE = 0.18;
+
+const api = {
+  async req(ep, opts={}) {
+    const token = localStorage.getItem('sl_token');
+    const res = await fetch(`${API}${ep}`, {
+      headers: { 'Content-Type':'application/json', ...(token?{Authorization:`Bearer ${token}`}:{}) },
+      ...opts
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.message || 'Error');
+    return d;
+  },
+  get: ep => api.req(ep),
+  post: (ep,b) => api.req(ep,{method:'POST',body:JSON.stringify(b)}),
+  put: (ep,b) => api.req(ep,{method:'PUT',body:JSON.stringify(b)}),
+  del: ep => api.req(ep,{method:'DELETE'}),
+};
+
+const ICONS = {shirt:'👔',tshirt:'👕',pant:'👖',jeans:'👖',sweater:'🧥',jacket:'🧥',dress:'👗',saree:'🥻',suit:'🤵',bedsheet:'🛏️',blanket:'🛌',curtains:'🪟',towel:'🧻',scarf:'🧣',socks:'🧦'};
+const SVCS = {wash:{l:'Wash',i:'💧',c:'#1565C0'},iron:{l:'Iron',i:'🔥',c:'#E65100'},dry_clean:{l:'Dry Clean',i:'✨',c:'#6A1B9A'},wash_iron:{l:'Wash+Iron',i:'💧🔥',c:'#1B5E20'}};
+
+const Toast = ({msg,type,onClose}) => {
+  useEffect(()=>{const t=setTimeout(onClose,3500);return()=>clearTimeout(t);},[]);
+  return <div style={{zIndex:99999,position:'fixed',top:'80px',right:'16px'}} className={`toast px-5 py-4 rounded-xl shadow-2xl flex items-center gap-3 font-semibold text-sm ${type==='success'?'bg-green-500 text-white':'bg-red-500 text-white'}`}>
+    <span>{type==='success'?'✓':'✗'}</span><span>{msg}</span><button onClick={onClose} className="ml-2 opacity-70 hover:opacity-100">×</button>
+  </div>;
+};
+
+// GST INVOICE COMPONENT
+const Invoice = ({booking, user, onClose}) => {
+  const subtotal = parseFloat(booking.total_amount||0);
+  const discount = parseFloat(booking.discount_amount||0);
+  const afterDiscount = subtotal - discount;
+  const gst = afterDiscount * GST_RATE;
+  const total = afterDiscount + gst;
+  const invoiceNum = `SL-${String(booking.id).padStart(6,'0')}`;
+  const today = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e=>e.stopPropagation()}>
+        {/* Invoice Header */}
+        <div className="p-6 border-b-4 border-yellow-400" style={{background:'#0D0D0D'}}>
+          <div className="flex justify-between items-start">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-3xl">🧺</span>
+                <h2 className="text-2xl font-black text-white" style={{fontFamily:'Syne,sans-serif'}}>SMART LAUNDRY</h2>
+              </div>
+              <p className="text-yellow-400 text-sm font-semibold">support@smartlaundry.in | +91-XXXXXXXXXX</p>
+              <p className="text-gray-400 text-xs mt-1">Smart Laundry Pvt Ltd, Bengaluru, India</p>
+              <p className="text-gray-500 text-xs">GSTIN: 29XXXXX1234X1ZX</p>
+            </div>
+            <div className="text-right">
+              <div className="bg-yellow-400 px-4 py-1 rounded-lg mb-2">
+                <p className="text-black font-black text-sm">TAX INVOICE</p>
+              </div>
+              <p className="text-white font-bold text-lg">{invoiceNum}</p>
+              <p className="text-gray-400 text-xs">Date: {today}</p>
+              <p className="text-gray-400 text-xs">Pickup: {new Date(booking.pickup_date).toLocaleDateString('en-IN')}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Bill To */}
+        <div className="p-6 bg-gray-50 border-b">
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Bill To</p>
+              <p className="font-bold text-gray-800">{booking.user_name || user?.name}</p>
+              <p className="text-sm text-gray-600">{booking.user_email || user?.email}</p>
+              <p className="text-sm text-gray-600">{booking.user_phone || user?.phone}</p>
+              {booking.user_type_at_booking === 'student' && (
+                <span className="inline-block mt-1 bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full">🎓 Student</span>
+              )}
+            </div>
+            <div>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Order Info</p>
+              <p className="text-sm"><span className="font-semibold">Order ID:</span> {invoiceNum}</p>
+              <p className="text-sm"><span className="font-semibold">Pickup Time:</span> {booking.pickup_time?.slice(0,5)}</p>
+              <p className="text-sm"><span className="font-semibold">Status:</span> <span className={`badge-${booking.status} ml-1`}>{booking.status}</span></p>
+            </div>
+          </div>
+        </div>
+
+        {/* Items Table */}
+        <div className="p-6">
+          <table className="invoice-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Service</th>
+                <th className="text-center">Qty</th>
+                <th className="text-right">Unit Price</th>
+                <th className="text-right">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {booking.items?.filter(i=>i&&i.name).map((item,idx)=>(
+                <tr key={idx}>
+                  <td><span className="mr-2">{ICONS[item.icon]||'👕'}</span>{item.name}</td>
+                  <td><span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full capitalize">{item.service_type?.replace('_',' ')}</span></td>
+                  <td className="text-center">{item.quantity}</td>
+                  <td className="text-right">₹{parseFloat(item.price).toFixed(2)}</td>
+                  <td className="text-right font-semibold">₹{(parseFloat(item.price)*item.quantity).toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* Totals */}
+          <div className="mt-6 flex justify-end">
+            <div className="w-72 space-y-2">
+              <div className="flex justify-between text-sm py-2 border-b">
+                <span className="text-gray-600">Subtotal</span>
+                <span className="font-semibold">₹{subtotal.toFixed(2)}</span>
+              </div>
+              {discount > 0 && (
+                <div className="flex justify-between text-sm py-2 border-b">
+                  <span className="text-green-600 font-semibold">🎓 Student Discount (20%)</span>
+                  <span className="text-green-600 font-semibold">-₹{discount.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-sm py-2 border-b">
+                <span className="text-gray-600">Taxable Amount</span>
+                <span className="font-semibold">₹{afterDiscount.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm py-2 border-b">
+                <span className="text-gray-600">CGST (9%)</span>
+                <span>₹{(gst/2).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm py-2 border-b">
+                <span className="text-gray-600">SGST (9%)</span>
+                <span>₹{(gst/2).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between py-3 bg-yellow-50 px-3 rounded-lg border-2 border-yellow-400">
+                <span className="font-black text-lg" style={{fontFamily:'Syne,sans-serif'}}>TOTAL</span>
+                <span className="font-black text-xl text-blue-700">₹{total.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 p-4 bg-gray-50 rounded-xl text-xs text-gray-500">
+            <p className="font-bold text-gray-700 mb-1">Terms & Conditions</p>
+            <p>• Prices include professional garment care services. • GST @18% applicable as per Indian tax laws.</p>
+            <p>• Student discount valid only for verified university email accounts. • For queries: support@smartlaundry.in</p>
+          </div>
+
+          <div className="mt-4 flex justify-between items-center">
+            <div className="text-xs text-gray-400">Thank you for choosing Smart Laundry! 🧺</div>
+            <button onClick={onClose} className="btn-primary text-sm">Close Invoice</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const App = () => {
+  const [user, setUser] = useState(null);
+  const [view, setView] = useState('landing');
+  const [authMode, setAuthMode] = useState(null); // null | 'login' | 'signup'
+  const [items, setItems] = useState([]);
+  const [cart, setCart] = useState([]);
+  const [bookings, setBookings] = useState([]);
+  const [allBookings, setAllBookings] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [pendingStudents, setPendingStudents] = useState([]);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [showInvoice, setShowInvoice] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [bookingSuccess, setBookingSuccess] = useState(null);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [emailWarning, setEmailWarning] = useState('');
+  const [loginForm, setLoginForm] = useState({email:'',password:''});
+  const [signupForm, setSignupForm] = useState({name:'',email:'',phone:'',password:'',userType:'customer',studentId:''});
+  const [bookingForm, setBookingForm] = useState({date:'',time:'10:00',address:''});
+
+  const showToast = (msg,type='success') => setToast({msg,type});
+
+  const isValidStudentEmail = email => {
+    const d = email.split('@')[1]?.toLowerCase();
+    return ['edu.in','ac.in','edu','kristujayanti.com','iiit.ac.in','nit.ac.in','iit.ac.in'].some(x=>d===x||d?.endsWith('.'+x));
+  };
+
+  useEffect(()=>{
+    const token = localStorage.getItem('sl_token');
+    if(token){
+      api.get('/auth/me').then(d=>{
+        const u = d.data.user;
+        setUser(u);
+        if(u.user_type==='admin'){loadAllBookings();loadStats();loadPendingStudents();setView('admin');}
+        else{loadBookings();setView('app');}
+      }).catch(()=>{localStorage.removeItem('sl_token');});
+    }
+    api.get('/items').then(d=>setItems(d.data.items)).catch(()=>{});
+  },[]);
+
+  useEffect(()=>{
+    if(signupForm.userType==='student'&&signupForm.email.includes('@')){
+      if(isValidStudentEmail(signupForm.email)) setEmailWarning('✅ University email — discount auto-activated!');
+      else setEmailWarning('⚠️ Please use university email (e.g., yourname@college.edu.in)');
+    } else setEmailWarning('');
+  },[signupForm.email,signupForm.userType]);
+
+  const loadBookings=async()=>{try{const d=await api.get('/bookings');setBookings(d.data.bookings);}catch(e){}};
+  const loadAllBookings=async(s='',sf='all')=>{try{let url=`/bookings/all?`;if(sf!=='all')url+=`status=${sf}&`;if(s)url+=`search=${encodeURIComponent(s)}`;const d=await api.get(url);setAllBookings(d.data.bookings);}catch(e){}};
+  const loadStats=async()=>{try{const d=await api.get('/bookings/stats');setStats(d.data.statistics);}catch(e){}};
+  const loadPendingStudents=async()=>{try{const d=await api.get('/auth/pending-students');setPendingStudents(d.data.students);}catch(e){}};
+
+  const handleLogin = async e=>{
+    e.preventDefault();setLoading(true);
+    try{
+      const d=await api.post('/auth/login',loginForm);
+      localStorage.setItem('sl_token',d.data.token);
+      setUser(d.data.user);setAuthMode(null);
+      if(d.data.user.user_type==='admin'){loadAllBookings();loadStats();loadPendingStudents();setView('admin');}
+      else{loadBookings();setView('app');}
+      showToast(`Welcome back, ${d.data.user.name}! 👋`);
+      setLoginForm({email:'',password:''});
+    }catch(err){showToast(err.message,'error');}
+    setLoading(false);
+  };
+
+  const handleSignup = async e=>{
+    e.preventDefault();
+    if(signupForm.userType==='student'&&!isValidStudentEmail(signupForm.email)){
+      return showToast('Please use your university email address','error');
+    }
+    setLoading(true);
+    try{
+      const d=await api.post('/auth/register',signupForm);
+      localStorage.setItem('sl_token',d.data.token);
+      setUser(d.data.user);setAuthMode(null);
+      loadBookings();setView('app');
+      showToast(signupForm.userType==='student'?'Account created! 🎓 Discount activated!':'Account created! Welcome aboard! 🎉');
+      setSignupForm({name:'',email:'',phone:'',password:'',userType:'customer',studentId:''});
+    }catch(err){showToast(err.message,'error');}
+    setLoading(false);
+  };
+
+  const handleLogout=()=>{
+    localStorage.removeItem('sl_token');setUser(null);setCart([]);setView('landing');
+    showToast('See you soon! 👋');
+  };
+
+  const addToCart=(item,svc)=>{
+    let price=0;
+    if(svc==='wash')price=+item.wash_price;
+    else if(svc==='iron')price=+item.iron_price;
+    else if(svc==='dry_clean')price=+item.dry_clean_price;
+    else if(svc==='wash_iron')price=+item.wash_price+ +item.iron_price;
+    if(user?.user_type==='student'&&user?.student_verified) price*=(1-item.student_discount_percent/100);
+    setCart(p=>{
+      const ex=p.find(c=>c.id==item.id&&c.svc===svc);
+      if(ex)return p.map(c=>c.id==item.id&&c.svc===svc?{...c,qty:c.qty+1}:c);
+      return[...p,{...item,svc,price,qty:1}];
+    });
+  };
+
+  const changeQty=(id,svc,delta)=>{
+    setCart(p=>{
+      const ex=p.find(c=>c.id==id&&c.svc===svc);
+      if(!ex)return p;
+      if(ex.qty+delta<=0)return p.filter(c=>!(c.id==id&&c.svc===svc));
+      return p.map(c=>c.id==id&&c.svc===svc?{...c,qty:c.qty+delta}:c);
+    });
+  };
+
+  const cartSubtotal=cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const cartGST=cartSubtotal*GST_RATE;
+  const cartTotal=cartSubtotal+cartGST;
+
+  const handleBooking=async e=>{
+    e.preventDefault();
+    if(!cart.length)return showToast('Add items to cart first!','error');
+    if(!bookingForm.date)return showToast('Select pickup date!','error');
+    if(!bookingForm.address)return showToast('Enter pickup address!','error');
+    setLoading(true);
+    try{
+      const d=await api.post('/bookings',{
+        items:cart.map(i=>({id:parseInt(i.id),quantity:i.qty,serviceType:i.svc})),
+        pickupDate:bookingForm.date,pickupTime:bookingForm.time,
+      });
+      setBookingSuccess(d.data.booking);setCart([]);
+      setBookingForm({date:'',time:'10:00',address:''});
+      await loadBookings();
+      setTimeout(()=>{setBookingSuccess(null);setView('orders');},3000);
+    }catch(err){showToast(err.message,'error');}
+    setLoading(false);
+  };
+
+  const updateStatus=async(id,status)=>{
+    try{await api.put(`/bookings/${id}/status`,{status});showToast('Status updated ✓');await loadAllBookings(search,statusFilter);await loadStats();if(selectedBooking?.id===id)setSelectedBooking({...selectedBooking,status});}catch(err){showToast(err.message,'error');}
+  };
+
+  const deleteBooking=async id=>{
+    if(!window.confirm('Delete this booking?'))return;
+    try{await api.del(`/bookings/${id}`);showToast('Deleted');setSelectedBooking(null);await loadAllBookings(search,statusFilter);await loadStats();}catch(err){showToast(err.message,'error');}
+  };
+
+  const verifyStudent=async(studentId,approved)=>{
+    try{await api.post('/auth/verify-student',{userId:studentId,approved});showToast(approved?'✅ Student approved!':'❌ Student rejected');await loadPendingStudents();}catch(err){showToast(err.message,'error');}
+  };
+
+  const isAdmin=user?.user_type==='admin';
+  const isStudent=user?.user_type==='student';
+  const isVerifiedStudent=isStudent&&user?.student_verified;
+
+  // ==================== LANDING PAGE ====================
+  if(view==='landing') return (
+    <div style={{fontFamily:'DM Sans,sans-serif'}}>
+      {toast && <Toast {...toast} onClose={()=>setToast(null)}/>}
+
+      {/* NAVBAR */}
+      <nav className="navbar">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-3xl">🧺</span>
+            <span className="text-xl font-black text-gray-900" style={{fontFamily:'Syne,sans-serif'}}>SMART LAUNDRY</span>
+          </div>
+          <div className="hidden md:flex items-center gap-8">
+            {[
+              ['About','#about'],
+              ['Services','#services'],
+              ['Pricing','#pricing'],
+              ['How It Works','#how-it-works'],
+              ['Contact','#contact']
+            ].map(([l,href])=>(
+              <a key={l} href={href} className="nav-link text-sm">{l}</a>
+            ))}
+          </div>
+          <div className="flex items-center gap-3">
+            <button onClick={()=>setAuthMode('login')} className="btn-outline text-sm" style={{padding:'8px 20px'}}>Log In</button>
+            <button onClick={()=>setAuthMode('signup')} className="btn-yellow text-sm" style={{padding:'8px 20px'}}>Sign Up</button>
+          </div>
+        </div>
+      </nav>
+
+      {/* HERO */}
+      <section className="hero" id="about">
+        <div className="max-w-7xl mx-auto px-6 py-16 grid lg:grid-cols-2 gap-12 items-center relative z-10">
+          <div>
+            <div className="hero-badge fade-up-d1">✨ Professional Laundry at Your Doorstep</div>
+            <h1 className="fade-up-d2 text-5xl md:text-7xl font-black leading-none mb-6" style={{fontFamily:'Syne,sans-serif',lineHeight:'1.05'}}>
+              SMARTER<br/>
+              <span style={{color:'var(--blue)',WebkitTextStroke:'2px var(--blue)',WebkitTextFillColor:'transparent'}}>CLOTHES</span><br/>
+              CARE<span style={{color:'var(--blue)'}}>.</span>
+            </h1>
+            <p className="fade-up-d3 text-lg text-gray-700 leading-relaxed mb-8 max-w-lg">
+              Your clothes deserve intelligent care. Book pickup, track in real-time, and get fresh, perfectly handled laundry — delivered to your doorstep. With exclusive 20% student discounts!
+            </p>
+            <div className="fade-up-d4 flex flex-wrap gap-4">
+              <button onClick={()=>setAuthMode('signup')} className="btn-primary">Sign Up Free →</button>
+              <button onClick={()=>setAuthMode('login')} className="btn-outline">Log In</button>
+            </div>
+            <div className="fade-up-d4 flex items-center gap-6 mt-8">
+              {[['24h','Turnaround'],['20%','Student Discount'],['15+','Items Available']].map(([v,l])=>(
+                <div key={l} className="text-center">
+                  <div className="text-2xl font-black" style={{fontFamily:'Syne,sans-serif',color:'var(--blue)'}}>{v}</div>
+                  <div className="text-xs text-gray-600 mt-0.5">{l}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="hidden lg:flex justify-center items-center">
+            <div className="relative">
+              <div className="floating text-[180px] leading-none">🧺</div>
+              <div className="absolute -top-4 -right-4 bg-white rounded-2xl p-4 shadow-xl border-2 border-yellow-400">
+                <div className="text-2xl font-black text-blue-700" style={{fontFamily:'Syne,sans-serif'}}>₹15+</div>
+                <div className="text-xs text-gray-500">Starting Price</div>
+              </div>
+              <div className="absolute -bottom-4 -left-4 bg-blue-700 rounded-2xl p-4 shadow-xl">
+                <div className="text-white text-lg">🎓 Students</div>
+                <div className="text-yellow-400 font-black text-xl" style={{fontFamily:'Syne,sans-serif'}}>20% OFF</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* MARQUEE */}
+      <div className="marquee-track">
+        <div className="marquee-inner">
+          {[...Array(2)].map((_,i)=>
+            ['WASH','IRON','DRY CLEAN','WASH + IRON','EXPRESS PICKUP','STUDENT DISCOUNT','DOORSTEP DELIVERY','PROFESSIONAL CARE','WASH','IRON','DRY CLEAN','WASH + IRON','EXPRESS PICKUP'].map((t,j)=>(
+              <div key={`${i}-${j}`} className="marquee-item">
+                <span className="marquee-dot" style={{background:'#FFD600',borderRadius:'50%',display:'inline-block'}}></span>
+                {t}
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* WHY SMART LAUNDRY */}
+      <section className="py-24 px-6 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-blue-600 font-bold text-sm uppercase tracking-widest mb-3">Why Choose Us</p>
+            <h2 className="text-4xl md:text-5xl font-black mb-4" style={{fontFamily:'Syne,sans-serif'}}>Why Smart Laundry?</h2>
+            <p className="text-gray-500 text-lg max-w-2xl mx-auto">(Because laundry should be the easiest part of your day.)</p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              {i:'📍',t:'At Your Doorstep',d:'No more carrying heavy laundry bags. Schedule pickup and delivery at your preferred time — we\'ll handle the rest.'},
+              {i:'📡',t:'Smart Tracking',d:'Track your order in real-time. Know exactly when your clothes are picked, cleaned, and on their way back.'},
+              {i:'✨',t:'Professional Care',d:'Premium washing, steam ironing, and expert dry cleaning. Your clothes treated with precision and care.'},
+              {i:'💰',t:'Transparent Pricing',d:'No hidden charges. Clear pricing with GST included. Student-friendly rates with automatic discounts.'},
+            ].map(({i,t,d})=>(
+              <div key={t} className="why-card">
+                <div className="why-icon">{i}</div>
+                <h3 className="font-black text-lg mb-3" style={{fontFamily:'Syne,sans-serif'}}>{t}</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">{d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* STATS */}
+      <section style={{background:'var(--dark)'}}>
+        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-700">
+          {[['15+','Clothing Items'],['4','Service Types'],['18%','GST Applied'],['20%','Student Discount']].map(([n,l])=>(
+            <div key={l} className="stat-item">
+              <div className="stat-num">{n}</div>
+              <div className="stat-label">{l}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* PRICING SECTION */}
+      <section className="py-24 px-6 bg-white" id="pricing">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-blue-600 font-bold text-sm uppercase tracking-widest mb-3">Transparent Pricing</p>
+            <h2 className="text-4xl md:text-5xl font-black mb-4" style={{fontFamily:'Syne,sans-serif'}}>Simple, Clear Pricing</h2>
+            <p className="text-gray-500 text-lg max-w-2xl mx-auto">No hidden charges. No surprises. GST (18%) applicable on all orders.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6 mb-10">
+            {[
+              {label:'👕 Shirts & T-Shirts',wash:'₹30–₹40',iron:'₹20–₹25',dry:'₹80–₹100'},
+              {label:'👖 Pants & Jeans',wash:'₹40–₹60',iron:'₹25–₹30',dry:'₹90–₹120'},
+              {label:'👗 Sarees & Dresses',wash:'₹60–₹80',iron:'₹35–₹50',dry:'₹100–₹150'},
+            ].map(({label,wash,iron,dry})=>(
+              <div key={label} className="border-2 border-gray-100 rounded-2xl overflow-hidden hover:border-yellow-400 transition-all">
+                <div className="bg-gray-900 text-white p-5">
+                  <h3 className="font-black text-lg" style={{fontFamily:'Syne,sans-serif'}}>{label}</h3>
+                </div>
+                <div className="p-5 space-y-3">
+                  {[['💧 Wash',wash],['🔥 Iron',iron],['✨ Dry Clean',dry]].map(([s,p])=>(
+                    <div key={s} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
+                      <span className="text-sm font-semibold text-gray-600">{s}</span>
+                      <span className="font-black text-blue-700">{p}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-blue-700 rounded-2xl p-8 text-white">
+              <div className="text-5xl mb-4">🎓</div>
+              <h3 className="text-2xl font-black mb-2" style={{fontFamily:'Syne,sans-serif'}}>Student Discount</h3>
+              <p className="text-blue-200 mb-4">Verified students automatically get 20% off on all services. Just sign up with your university email (.edu.in / .ac.in)!</p>
+              <div className="bg-white bg-opacity-10 rounded-xl p-4">
+                <p className="text-yellow-400 font-black text-3xl" style={{fontFamily:'Syne,sans-serif'}}>20% OFF</p>
+                <p className="text-blue-200 text-sm mt-1">Auto-activated for university emails</p>
+              </div>
+            </div>
+            <div className="bg-yellow-50 border-2 border-yellow-400 rounded-2xl p-8">
+              <div className="text-5xl mb-4">🧾</div>
+              <h3 className="text-2xl font-black mb-2" style={{fontFamily:'Syne,sans-serif'}}>GST Billing</h3>
+              <p className="text-gray-600 mb-4">All orders include a proper GST invoice (18% tax). Fully transparent breakup with CGST & SGST shown.</p>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between"><span className="text-gray-500">Subtotal</span><span className="font-bold">₹100.00</span></div>
+                <div className="flex justify-between"><span className="text-gray-500">CGST (9%)</span><span>₹9.00</span></div>
+                <div className="flex justify-between"><span className="text-gray-500">SGST (9%)</span><span>₹9.00</span></div>
+                <div className="flex justify-between font-black text-blue-700 border-t pt-2"><span>Total</span><span>₹118.00</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA BAND */}
+      <section className="cta-band py-20 px-6">
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <h2 className="text-5xl md:text-7xl font-black text-white mb-2" style={{fontFamily:'Syne,sans-serif',lineHeight:'1'}}>SMART TIME</h2>
+          <p className="text-yellow-400 text-xl font-bold mb-4">"It's Laundry O'Clock."</p>
+          <p className="text-gray-400 text-lg mb-8">Too busy to wash? Too tired to iron? Too important to waste time?<br/>It's time to switch to Smart Laundry.</p>
+          <div className="flex justify-center gap-4 flex-wrap">
+            <button onClick={()=>setAuthMode('signup')} className="btn-yellow text-base" style={{padding:'16px 40px'}}>Schedule Pickup →</button>
+            <button onClick={()=>setAuthMode('login')} className="btn-outline text-base" style={{padding:'16px 40px',color:'white',borderColor:'white'}}>Get Started</button>
+          </div>
+        </div>
+      </section>
+
+      {/* SERVICES */}
+      <section className="py-24 px-6" id="services" style={{background:'var(--yellow)'}}>
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-black mb-3" style={{fontFamily:'Syne,sans-serif'}}>Our Services</h2>
+            <p className="text-gray-700 text-lg">(Laundry made simple. Just choose and relax.)</p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {bg:'#1565C0',t:'WASH + FOLD',d:'Everyday clothes cleaned, dried, and neatly folded. Perfect for daily wear.',i:'🧺'},
+              {bg:'#8E24AA',t:'WASH + IRON',d:'Fresh wash with perfectly pressed finishing. Ready to wear, every time.',i:'👔'},
+              {bg:'#0097A7',t:'STEAM IRON',d:'Professional wrinkle-free ironing for all fabric types and delicate clothes.',i:'🔥'},
+              {bg:'#2E7D32',t:'DRY CLEAN',d:'Premium dry cleaning for delicate, formal, and special occasion garments.',i:'✨'},
+              {bg:'#E65100',t:'EXPRESS DELIVERY',d:'Need it urgent? Get same-day or 24-hour turnaround for your laundry.',i:'⚡'},
+              {bg:'#37474F',t:'STUDENT SPECIAL',d:'Verified students get automatic 20% discount on all services. Just use your .edu email!',i:'🎓'},
+            ].map(({bg,t,d,i})=>(
+              <div key={t} className="service-card" style={{background:bg}}>
+                <div className="text-5xl mb-4">{i}</div>
+                <h3 className="text-xl font-black mb-3" style={{fontFamily:'Syne,sans-serif'}}>{t}</h3>
+                <p className="text-sm opacity-80 leading-relaxed">{d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section className="py-24 px-6 bg-white" id="how-it-works">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-blue-600 font-bold text-sm uppercase tracking-widest mb-3">Process</p>
+            <h2 className="text-4xl font-black mb-3" style={{fontFamily:'Syne,sans-serif'}}>How Smart Laundry Works</h2>
+            <p className="text-gray-500">Simple. Smart. Stress-free.</p>
+          </div>
+          <div className="max-w-2xl mx-auto">
+            {[
+              {n:'1',t:'Sign Up & Schedule',d:'Create your account with email. Students use university email for instant discount activation.'},
+              {n:'2',t:'We Collect Your Laundry',d:'Our team picks up from your doorstep at your chosen date and time.'},
+              {n:'3',t:'Washed & Processed',d:'Professional cleaning using the right method — wash, iron, dry clean, or combo.'},
+              {n:'4',t:'Quality Check',d:'Every garment inspected before packing. We ensure nothing is missed.'},
+              {n:'5',t:'Delivered Fresh',d:'Clean, folded, and perfectly handled laundry delivered back to your door.'},
+            ].map(({n,t,d},idx,arr)=>(
+              <div key={n}>
+                <div className="flex gap-5">
+                  <div className="flex flex-col items-center">
+                    <div className="step-num">{n}</div>
+                    {idx<arr.length-1 && <div className="step-line"></div>}
+                  </div>
+                  <div className="pb-8">
+                    <h3 className="font-black text-lg mb-1" style={{fontFamily:'Syne,sans-serif'}}>{t}</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">{d}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section className="py-24 px-6 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-black mb-3" style={{fontFamily:'Syne,sans-serif'}}>What Our Customers Say</h2>
+            <p className="text-gray-500">(Real people. Real freshness.)</p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              {n:'Amit Sharma',t:'★★★★★',q:'Smart Laundry saved me so much time during exams. Affordable, quick, and clothes come back perfectly folded!',r:'Student, MCA'},
+              {n:'Priya Nair',t:'★★★★★',q:'The app is easy to use and delivery is always on time. I love the real-time tracking feature!',r:'Working Professional'},
+              {n:'Rahul Verma',t:'★★★★★',q:'Professional service with great pricing. Much better than local laundry options. 10/10!',r:'Customer'},
+              {n:'Sneha Kapoor',t:'★★★★★',q:'Customer support is responsive and the clothes smell amazing every time. Highly recommend!',r:'Student, BCA'},
+            ].map(({n,t,q,r})=>(
+              <div key={n} className="review-card">
+                <div className="stars">{t}</div>
+                <p className="text-gray-700 text-sm leading-relaxed mb-4">"{q}"</p>
+                <div className="flex items-center gap-3 mt-auto">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center font-black text-white text-lg" style={{background:'var(--blue)'}}>
+                    {n[0]}
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm text-gray-800">{n}</p>
+                    <p className="text-xs text-gray-500">{r}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="py-16 px-6" id="contact">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-10">
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-3xl">🧺</span>
+              <span className="text-xl font-black text-white" style={{fontFamily:'Syne,sans-serif'}}>SMART LAUNDRY</span>
+            </div>
+            <p className="text-gray-400 text-sm leading-relaxed">Making laundry effortless and intelligent. Premium garment care with technology-driven convenience.</p>
+            <div className="flex gap-4 mt-6">
+              {['📷','💼','👍','🐦'].map((ic,i)=>(
+                <div key={i} className="w-9 h-9 bg-gray-800 rounded-full flex items-center justify-center text-lg cursor-pointer hover:bg-yellow-500 transition-colors">{ic}</div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h4 className="text-white font-black mb-4 text-sm uppercase tracking-wider" style={{fontFamily:'Syne,sans-serif'}}>Quick Links</h4>
+            <ul className="space-y-2">
+              {['About Us','Our Services','Pricing','Membership','Blog','FAQ','Privacy Policy'].map(l=>(
+                <li key={l}><a href="#" className="text-gray-400 text-sm hover:text-yellow-400 transition-colors">{l}</a></li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-white font-black mb-4 text-sm uppercase tracking-wider" style={{fontFamily:'Syne,sans-serif'}}>Services</h4>
+            <ul className="space-y-2">
+              {['Wash + Fold','Wash + Iron','Steam Iron','Dry Clean','Express Delivery','Student Discount'].map(l=>(
+                <li key={l}><a href="#" className="text-gray-400 text-sm hover:text-yellow-400 transition-colors">{l}</a></li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-white font-black mb-4 text-sm uppercase tracking-wider" style={{fontFamily:'Syne,sans-serif'}}>Contact Us</h4>
+            <div className="space-y-3 text-sm text-gray-400">
+              <div className="flex items-start gap-2"><span>📍</span><span>Smart Laundry Pvt Ltd<br/>Bengaluru, India</span></div>
+              <div className="flex items-center gap-2"><span>📧</span><span>smartlaundry@gmail.com</span></div>
+              <div className="flex items-center gap-2"><span>📞</span><span>+91 - 9019785450</span></div>
+              <div className="flex items-center gap-2"><span>🕐</span><span>Mon–Sat, 8AM–8PM</span></div>
+            </div>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto mt-12 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-gray-500 text-sm">© 2026 Smart Laundry Pvt Ltd. All rights reserved.</p>
+          <p className="text-gray-600 text-xs">GST Registered | GSTIN: 29XXXXX1234X1ZX | Made with ❤️ in India</p>
+        </div>
+      </footer>
+
+      {/* AUTH MODAL */}
+      {authMode && (
+        <div className="auth-overlay" onClick={()=>setAuthMode(null)}>
+          <div className="auth-modal bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl" onClick={e=>e.stopPropagation()}>
+            {/* Modal Top */}
+            <div className="p-8" style={{background:'var(--yellow)'}}>
+              <div className="flex justify-between items-center">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-3xl">🧺</span>
+                    <span className="text-xl font-black" style={{fontFamily:'Syne,sans-serif'}}>SMART LAUNDRY</span>
+                  </div>
+                  <p className="text-gray-700 text-sm">{authMode==='login'?'Welcome back! 👋':'Join us today! 🎉'}</p>
+                </div>
+                <button onClick={()=>setAuthMode(null)} className="w-9 h-9 bg-black bg-opacity-10 rounded-full flex items-center justify-center text-xl font-bold hover:bg-opacity-20">×</button>
+              </div>
+              <div className="flex mt-4 bg-black bg-opacity-10 rounded-xl p-1">
+                {['login','signup'].map(m=>(
+                  <button key={m} onClick={()=>setAuthMode(m)}
+                    className={`flex-1 py-2 rounded-lg font-bold capitalize text-sm transition-all ${authMode===m?'bg-white shadow-md text-blue-700':'text-gray-700 hover:text-gray-900'}`}>
+                    {m==='login'?'Log In':'Sign Up'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-8">
+              {authMode==='login' ? (
+                <form onSubmit={handleLogin} className="space-y-4">
+                  {[['email','Email','email','your@email.com'],['password','Password','password','••••••••']].map(([k,l,t,p])=>(
+                    <div key={k}>
+                      <label className="inp-label">{l}</label>
+                      <input type={t} required value={loginForm[k]} onChange={e=>setLoginForm({...loginForm,[k]:e.target.value})} className="inp" placeholder={p}/>
+                    </div>
+                  ))}
+                  <button type="submit" disabled={loading} className="btn-primary w-full mt-2" style={{padding:'14px'}}>
+                    {loading?'Logging in...':'Log In →'}
+                  </button>
+                  <p className="text-center text-sm text-gray-500">No account? <button type="button" onClick={()=>setAuthMode('signup')} className="text-blue-600 font-semibold hover:underline">Sign up free</button></p>
+                </form>
+              ) : (
+                <form onSubmit={handleSignup} className="space-y-3">
+                  <div>
+                    <label className="inp-label">I am a</label>
+                    <select value={signupForm.userType} onChange={e=>setSignupForm({...signupForm,userType:e.target.value})} className="inp">
+                      <option value="customer">Customer</option>
+                      <option value="student">🎓 Student (20% Auto-Discount)</option>
+                    </select>
+                  </div>
+                  {[['name','Full Name','text','Akhil Pramod'],['phone','Phone','tel','+91 98765 43210'],['password','Password','password','Min 6 characters']].map(([k,l,t,p])=>(
+                    <div key={k}>
+                      <label className="inp-label">{l}</label>
+                      <input type={t} required value={signupForm[k]} onChange={e=>setSignupForm({...signupForm,[k]:e.target.value})} className="inp" placeholder={p}/>
+                    </div>
+                  ))}
+                  <div>
+                    <label className="inp-label">Email {signupForm.userType==='student'&&<span className="text-blue-600">(Use university email!)</span>}</label>
+                    <input type="email" required value={signupForm.email} onChange={e=>setSignupForm({...signupForm,email:e.target.value})} className="inp" placeholder={signupForm.userType==='student'?'you@college.edu.in':'your@email.com'}/>
+                    {emailWarning && <p className={`text-xs mt-1 font-semibold ${emailWarning.includes('✅')?'text-green-600':'text-orange-500'}`}>{emailWarning}</p>}
+                  </div>
+                  {signupForm.userType==='student' && (
+                    <div>
+                      <label className="inp-label">Student ID</label>
+                      <input type="text" required value={signupForm.studentId} onChange={e=>setSignupForm({...signupForm,studentId:e.target.value})} className="inp" placeholder="STUD123456"/>
+                    </div>
+                  )}
+                  <button type="submit" disabled={loading} className="btn-yellow w-full mt-2" style={{padding:'14px'}}>
+                    {loading?'Creating Account...':'Create Account →'}
+                  </button>
+                  <p className="text-center text-xs text-gray-400">By signing up you agree to our Terms & Privacy Policy</p>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  // ==================== LOGGED IN APP ====================
+  const AppNav = () => (
+    <nav className="navbar">
+      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <button onClick={()=>setView(isAdmin?'admin':'app')} className="flex items-center gap-2">
+          <span className="text-3xl">🧺</span>
+          <span className="text-xl font-black" style={{fontFamily:'Syne,sans-serif',color:'var(--dark)'}}>SMART LAUNDRY</span>
+        </button>
+        <div className="hidden md:flex items-center gap-6">
+          {isAdmin ? (
+            <>
+              {[['admin','Dashboard'],['admin-orders','All Orders'],['admin-students','Students']].map(([v,l])=>(
+                <button key={v} onClick={()=>setView(v)} className={`nav-link text-sm ${view===v?'active':''}`}>{l}</button>
+              ))}
+            </>
+          ) : (
+            <>
+              {[['app','Home'],['book','Book Now'],['orders','My Orders']].map(([v,l])=>(
+                <button key={v} onClick={()=>setView(v)} className={`nav-link text-sm ${view===v?'active':''}`}>{l}</button>
+              ))}
+              {cart.length>0&&(
+                <button onClick={()=>setView('book')} className="relative">
+                  <span className="text-2xl">🛒</span>
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-black">{cart.reduce((s,i)=>s+i.qty,0)}</span>
+                </button>
+              )}
+            </>
+          )}
+          <div className="flex items-center gap-3 pl-4 border-l-2 border-yellow-400">
+            <div className="w-9 h-9 rounded-full flex items-center justify-center font-black text-white text-sm" style={{background:'var(--blue)'}}>{user.name[0].toUpperCase()}</div>
+            <div>
+              <p className="font-bold text-sm">{user.name}</p>
+              <p className="text-xs text-gray-500 capitalize">{user.user_type}{isVerifiedStudent&&<span className="text-green-600 font-bold"> ✓20%</span>}</p>
+            </div>
+            <button onClick={handleLogout} className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 text-sm font-bold">↗</button>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+
+  // HOME VIEW
+  if(view==='app') return (
+    <div className="app-view">
+      {toast&&<Toast {...toast} onClose={()=>setToast(null)}/>}
+      <AppNav/>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Welcome Banner */}
+        <div className="rounded-3xl p-8 mb-8 relative overflow-hidden" style={{background:'var(--dark)'}}>
+          <div className="absolute right-0 top-0 bottom-0 w-64 opacity-10 flex items-center justify-center text-[200px]">🧺</div>
+          <h2 className="text-3xl font-black text-white mb-2 relative z-10" style={{fontFamily:'Syne,sans-serif'}}>Hello, {user.name}! 👋</h2>
+          <p className="text-gray-400 relative z-10">{isVerifiedStudent?'🎓 Student Discount Active! You\'re getting 20% off all services.':isStudent?'⏳ Student verification pending — use your university email for instant verification.':'Ready to book your laundry pickup?'}</p>
+          <div className="flex gap-4 mt-6 relative z-10">
+            <button onClick={()=>setView('book')} className="btn-yellow text-sm" style={{padding:'10px 24px'}}>Book Now →</button>
+            <button onClick={()=>setView('orders')} className="btn-outline text-sm" style={{padding:'10px 24px',color:'white',borderColor:'#555'}}>View Orders</button>
+          </div>
+        </div>
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-4 mb-8">
+          {[[bookings.filter(b=>b.status==='pending').length,'⏳','Pending'],[bookings.filter(b=>b.status==='processing').length,'⚙️','Processing'],[bookings.filter(b=>b.status==='completed').length,'✅','Completed']].map(([v,i,l])=>(
+            <div key={l} className="bg-white rounded-2xl p-5 text-center border-2 border-gray-100 hover:border-yellow-400 transition-colors">
+              <div className="text-3xl mb-1">{i}</div>
+              <div className="text-3xl font-black" style={{fontFamily:'Syne,sans-serif'}}>{v}</div>
+              <div className="text-sm text-gray-500 mt-1">{l}</div>
+            </div>
+          ))}
+        </div>
+        {/* Quick Items Preview */}
+        <h3 className="text-xl font-black mb-4" style={{fontFamily:'Syne,sans-serif'}}>Quick Pick</h3>
+        <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-3">
+          {items.slice(0,12).map(item=>{
+            const p=+item.wash_price;
+            const dp=isVerifiedStudent?p*(1-item.student_discount_percent/100):p;
+            return(
+              <div key={item.id} className="bg-white rounded-2xl p-4 text-center border-2 border-gray-100 hover:border-yellow-400 transition-all cursor-pointer" onClick={()=>setView('book')}>
+                <div className="text-4xl mb-2">{ICONS[item.icon]||'👕'}</div>
+                <p className="font-semibold text-xs text-gray-700 leading-tight">{item.name}</p>
+                {isVerifiedStudent&&p!==dp?<><p className="text-xs text-gray-400 line-through">₹{p}</p><p className="text-blue-600 font-black text-sm">₹{dp.toFixed(0)}</p></>:
+                <p className="text-blue-600 font-bold text-sm mt-1">₹{p}+</p>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+
+  // BOOKING VIEW
+  if(view==='book') return (
+    <div className="app-view">
+      {toast&&<Toast {...toast} onClose={()=>setToast(null)}/>}
+      <AppNav/>
+      {bookingSuccess&&(
+        <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-10 max-w-md text-center shadow-2xl" style={{animation:'modalIn 0.4s ease'}}>
+            <div className="text-7xl mb-4">✅</div>
+            <h3 className="text-2xl font-black mb-2" style={{fontFamily:'Syne,sans-serif'}}>Booking Confirmed!</h3>
+            <p className="text-gray-500 mb-4">Your laundry has been scheduled successfully.</p>
+            <div className="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-4 text-left text-sm space-y-1">
+              <p><b>Order ID:</b> SL-{String(bookingSuccess.id).padStart(6,'0')}</p>
+              <p><b>Subtotal:</b> ₹{parseFloat(bookingSuccess.final_amount).toFixed(2)}</p>
+              <p><b>GST (18%):</b> ₹{(parseFloat(bookingSuccess.final_amount)*GST_RATE).toFixed(2)}</p>
+              <p className="text-blue-700 font-black text-base"><b>Total (incl. GST):</b> ₹{(parseFloat(bookingSuccess.final_amount)*(1+GST_RATE)).toFixed(2)}</p>
+              {parseFloat(bookingSuccess.discount_amount)>0&&<p className="text-green-600"><b>You Saved:</b> ₹{bookingSuccess.discount_amount}</p>}
+            </div>
+            <p className="text-gray-400 text-xs mt-4">Redirecting to orders...</p>
+          </div>
+        </div>
+      )}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <h2 className="text-3xl font-black mb-2" style={{fontFamily:'Syne,sans-serif'}}>Book Laundry Service</h2>
+        {isVerifiedStudent&&<div className="inline-flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-bold mb-6">🎓 Student Discount Active — 20% OFF all services</div>}
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Items Grid */}
+          <div className="lg:col-span-2 space-y-4">
+            {items.map(item=>{
+              const services=[
+                item.has_wash&&['wash',+item.wash_price],
+                item.has_iron&&['iron',+item.iron_price],
+                item.has_dry_clean&&['dry_clean',+item.dry_clean_price],
+                item.has_wash_iron&&['wash_iron',+item.wash_price+ +item.iron_price],
+              ].filter(Boolean);
+              return(
+                <div key={item.id} className="item-card">
+                  <div className="flex items-center gap-4 mb-3">
+                    <span className="text-4xl">{ICONS[item.icon]||'👕'}</span>
+                    <div><p className="font-black text-base" style={{fontFamily:'Syne,sans-serif'}}>{item.name}</p><p className="text-xs text-gray-400 capitalize">{item.category}</p></div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {services.map(([svc,basePrice])=>{
+                      const disc=isVerifiedStudent?(basePrice*(item.student_discount_percent/100)):0;
+                      const fp=basePrice-disc;
+                      const inCart=cart.find(c=>c.id==item.id&&c.svc===svc);
+                      const s=SVCS[svc];
+                      return(
+                        <div key={svc} className={`border-2 rounded-xl p-2 text-center min-w-[80px] transition-all ${inCart?'border-blue-500 bg-blue-50':' border-gray-200 hover:border-gray-300'}`}>
+                          <div className="text-lg">{s.i}</div>
+                          <div className="text-xs font-bold">{s.l}</div>
+                          {disc>0?(<><div className="text-xs text-gray-400 line-through">₹{basePrice}</div><div className="text-xs font-black text-blue-600">₹{fp.toFixed(0)}</div></>):
+                          <div className="text-xs font-black" style={{color:s.c}}>₹{basePrice}</div>}
+                          <div className="flex items-center justify-center gap-1 mt-1">
+                            <button onClick={()=>changeQty(item.id,svc,-1)} className="w-5 h-5 bg-gray-100 rounded-full text-xs font-bold hover:bg-gray-200">−</button>
+                            <span className="text-xs font-bold w-4 text-center">{inCart?inCart.qty:0}</span>
+                            <button onClick={()=>addToCart({...item},svc)} className="w-5 h-5 rounded-full text-xs font-black text-white hover:opacity-80" style={{background:s.c}}>+</button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Cart */}
+          <div>
+            <div className="bg-white rounded-2xl p-6 border-2 border-gray-100 sticky top-24">
+              <h3 className="font-black text-xl mb-4" style={{fontFamily:'Syne,sans-serif'}}>Your Cart 🛒</h3>
+              {!cart.length?<div className="text-center py-8 text-gray-400"><div className="text-5xl mb-2">🛒</div><p className="text-sm">No items added yet</p></div>:(
+                <>
+                  <div className="space-y-3 max-h-56 overflow-y-auto mb-4">
+                    {cart.map((item,idx)=>(
+                      <div key={idx} className="flex items-center justify-between bg-gray-50 rounded-xl p-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">{ICONS[item.icon]||'👕'}</span>
+                          <div>
+                            <p className="font-semibold text-xs">{item.name}</p>
+                            <p className="text-xs text-gray-400">{SVCS[item.svc]?.i} {SVCS[item.svc]?.l} ×{item.qty}</p>
+                          </div>
+                        </div>
+                        <span className="font-black text-sm text-blue-700">₹{(item.price*item.qty).toFixed(0)}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {isVerifiedStudent&&<div className="bg-green-50 border border-green-200 rounded-xl p-3 mb-3 text-xs text-green-700 font-semibold">🎓 Student discount applied!</div>}
+                  <div className="border-t pt-3 space-y-1 text-sm mb-4">
+                    <div className="flex justify-between"><span className="text-gray-500">Subtotal</span><span className="font-semibold">₹{cartSubtotal.toFixed(2)}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500">GST (18%)</span><span className="font-semibold text-orange-500">₹{cartGST.toFixed(2)}</span></div>
+                    <div className="flex justify-between text-lg font-black border-t pt-2" style={{fontFamily:'Syne,sans-serif'}}><span>Total</span><span style={{color:'var(--blue)'}}>₹{cartTotal.toFixed(2)}</span></div>
+                  </div>
+                  <form onSubmit={handleBooking} className="space-y-3">
+                    <div>
+                      <label className="inp-label">Pickup Address</label>
+                      <textarea required value={bookingForm.address} onChange={e=>setBookingForm({...bookingForm,address:e.target.value})} className="inp" rows="2" placeholder="Full address with landmark"/>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="inp-label">Date</label>
+                        <input type="date" required value={bookingForm.date} min={new Date().toISOString().split('T')[0]} onChange={e=>setBookingForm({...bookingForm,date:e.target.value})} className="inp"/>
+                      </div>
+                      <div>
+                        <label className="inp-label">Time</label>
+                        <select value={bookingForm.time} onChange={e=>setBookingForm({...bookingForm,time:e.target.value})} className="inp">
+                          {['08:00','09:00','10:00','11:00','12:00','14:00','15:00','16:00','17:00','18:00'].map(t=><option key={t} value={t}>{t}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <button type="submit" disabled={loading} className="btn-primary w-full">{loading?'Booking...':'Confirm Booking →'}</button>
+                  </form>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // MY ORDERS
+  if(view==='orders') return (
+    <div className="app-view">
+      {toast&&<Toast {...toast} onClose={()=>setToast(null)}/>}
+      {showInvoice&&<Invoice booking={showInvoice} user={user} onClose={()=>setShowInvoice(null)}/>}
+      <AppNav/>
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <h2 className="text-3xl font-black mb-6" style={{fontFamily:'Syne,sans-serif'}}>My Orders</h2>
+        {!bookings.length?<div className="bg-white rounded-3xl p-16 text-center border-2 border-gray-100"><div className="text-6xl mb-4">📦</div><h3 className="text-xl font-bold text-gray-600 mb-2">No orders yet</h3><button onClick={()=>setView('book')} className="btn-primary mt-4">Book Now →</button></div>:(
+          <div className="space-y-4">
+            {bookings.map(b=>{
+              const sub=+b.final_amount; const gst=sub*GST_RATE; const total=sub+gst;
+              return(
+                <div key={b.id} className="bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-yellow-400 transition-all">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="font-black text-lg" style={{fontFamily:'Syne,sans-serif'}}>SL-{String(b.id).padStart(6,'0')}</p>
+                      <p className="text-sm text-gray-500">{new Date(b.pickup_date).toLocaleDateString('en-IN')} at {b.pickup_time?.slice(0,5)}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className={`badge-${b.status}`}>{b.status}</span>
+                      <p className="font-black text-lg mt-1 text-blue-700" style={{fontFamily:'Syne,sans-serif'}}>₹{total.toFixed(2)}</p>
+                      <p className="text-xs text-gray-400">incl. GST</p>
+                      {+b.discount_amount>0&&<p className="text-xs text-green-600">Saved ₹{+b.discount_amount}</p>}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {b.items?.filter(i=>i&&i.name).map((item,idx)=>(
+                      <div key={idx} className="flex items-center gap-1 bg-gray-50 rounded-lg px-3 py-1.5 text-xs">
+                        <span>{ICONS[item.icon]||'👕'}</span>
+                        <span className="font-semibold">{item.name}</span>
+                        <span className="text-gray-400">×{item.quantity}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <button onClick={()=>setShowInvoice({...b,user_name:user.name,user_email:user.email,user_phone:user.phone})} className="text-sm text-blue-600 font-bold hover:underline flex items-center gap-1">
+                    📄 View GST Invoice
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  // ADMIN VIEWS
+  if(view==='admin'||view==='admin-orders'||view==='admin-students') return (
+    <div className="app-view">
+      {toast&&<Toast {...toast} onClose={()=>setToast(null)}/>}
+      {showInvoice&&<Invoice booking={showInvoice} user={user} onClose={()=>setShowInvoice(null)}/>}
+      {selectedBooking&&(
+        <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4" onClick={()=>setSelectedBooking(null)}>
+          <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e=>e.stopPropagation()}>
+            <div className="p-6 border-b flex justify-between">
+              <h3 className="font-black text-xl" style={{fontFamily:'Syne,sans-serif'}}>Order SL-{String(selectedBooking.id).padStart(6,'0')}</h3>
+              <button onClick={()=>setSelectedBooking(null)} className="text-gray-400 hover:text-gray-700 text-xl">×</button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="bg-blue-50 rounded-xl p-4"><p className="font-bold text-blue-800 mb-2">Customer</p><p>{selectedBooking.user_name}</p><p className="text-gray-500">{selectedBooking.user_email}</p></div>
+                <div className="bg-yellow-50 rounded-xl p-4"><p className="font-bold text-yellow-800 mb-2">Pickup</p><p>{new Date(selectedBooking.pickup_date).toLocaleDateString('en-IN')}</p><p className="text-gray-500">{selectedBooking.pickup_time?.slice(0,5)}</p></div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {selectedBooking.items?.filter(i=>i&&i.name).map((item,idx)=>(
+                  <div key={idx} className="bg-gray-50 rounded-xl p-3 text-center text-xs">
+                    <div className="text-3xl mb-1">{ICONS[item.icon]||'👕'}</div>
+                    <p className="font-bold">{item.name}</p><p className="text-gray-400">×{item.quantity}</p>
+                    <p className="font-black text-blue-600">₹{(+item.price*item.quantity).toFixed(0)}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="bg-gray-900 rounded-xl p-4 text-sm space-y-2">
+                <div className="flex justify-between text-gray-400"><span>Subtotal</span><span>₹{(+selectedBooking.total_amount).toFixed(2)}</span></div>
+                {+selectedBooking.discount_amount>0&&<div className="flex justify-between text-green-400"><span>🎓 Student Discount</span><span>-₹{(+selectedBooking.discount_amount).toFixed(2)}</span></div>}
+                <div className="flex justify-between text-gray-400"><span>After Discount</span><span>₹{(+selectedBooking.final_amount).toFixed(2)}</span></div>
+                <div className="flex justify-between text-orange-400"><span>GST (18%)</span><span>₹{(+selectedBooking.final_amount*GST_RATE).toFixed(2)}</span></div>
+                <div className="flex justify-between text-yellow-400 font-black text-lg border-t border-gray-700 pt-2"><span>TOTAL</span><span>₹{(+selectedBooking.final_amount*(1+GST_RATE)).toFixed(2)}</span></div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {['pending','processing','completed'].map(s=>(
+                  <button key={s} onClick={()=>updateStatus(selectedBooking.id,s)} className={`py-2 rounded-xl font-bold capitalize text-sm transition-all ${selectedBooking.status===s?'bg-blue-600 text-white':'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}>{s}</button>
+                ))}
+              </div>
+              <div className="flex gap-3">
+                <button onClick={()=>{setShowInvoice(selectedBooking);}} className="flex-1 py-2 bg-yellow-400 text-black rounded-xl font-bold text-sm">📄 GST Invoice</button>
+                <button onClick={()=>deleteBooking(selectedBooking.id)} className="flex-1 py-2 bg-red-50 text-red-600 rounded-xl font-bold text-sm">🗑️ Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      <AppNav/>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {view==='admin'&&(
+          <>
+            <h2 className="text-3xl font-black mb-6" style={{fontFamily:'Syne,sans-serif'}}>Admin Dashboard</h2>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              {[[stats?.total_bookings||0,'📦','Total Bookings','#1565C0'],[stats?.pending_bookings||0,'⏳','Pending','#E65100'],[stats?.processing_bookings||0,'⚙️','Processing','#8E24AA'],[`₹${(+stats?.total_revenue||0).toFixed(0)}+`,'💰','Revenue (pre-GST)','#2E7D32']].map(([v,i,l,c])=>(
+                <div key={l} className="rounded-2xl p-6 text-white" style={{background:c}}>
+                  <div className="text-4xl mb-2">{i}</div>
+                  <div className="text-3xl font-black" style={{fontFamily:'Syne,sans-serif'}}>{v}</div>
+                  <div className="text-sm opacity-75 mt-1">{l}</div>
+                </div>
+              ))}
+            </div>
+            {pendingStudents.length>0&&(
+              <div className="bg-yellow-50 border-2 border-yellow-400 rounded-2xl p-6 mb-8">
+                <h3 className="font-black text-lg mb-4" style={{fontFamily:'Syne,sans-serif'}}>⏳ Pending Verifications ({pendingStudents.length})</h3>
+                <div className="space-y-3">
+                  {pendingStudents.map(s=>(
+                    <div key={s.id} className="bg-white rounded-xl p-4 flex items-center justify-between">
+                      <div>
+                        <p className="font-bold">{s.name}</p>
+                        <p className="text-sm text-gray-500">{s.email}</p>
+                        <p className="text-xs text-gray-400">ID: {s.student_id_number}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={()=>verifyStudent(s.id,true)} className="px-4 py-2 bg-green-500 text-white rounded-xl font-bold text-sm hover:bg-green-600">✓ Approve</button>
+                        <button onClick={()=>verifyStudent(s.id,false)} className="px-4 py-2 bg-red-500 text-white rounded-xl font-bold text-sm hover:bg-red-600">✗ Reject</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="bg-white rounded-2xl p-6 border-2 border-gray-100">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-black text-lg" style={{fontFamily:'Syne,sans-serif'}}>Recent Orders</h3>
+                <button onClick={()=>setView('admin-orders')} className="text-blue-600 font-semibold text-sm hover:underline">View All →</button>
+              </div>
+              {allBookings.slice(0,6).map(b=>(
+                <div key={b.id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors" onClick={()=>setSelectedBooking(b)}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center font-black text-white text-sm" style={{background:'var(--blue)'}}>{(b.user_name||'U')[0].toUpperCase()}</div>
+                    <div><p className="font-semibold text-sm">{b.user_name}</p><p className="text-xs text-gray-400">SL-{String(b.id).padStart(6,'0')} • {b.items?.length||0} items</p></div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-black text-blue-700 text-sm">₹{(+b.final_amount*(1+GST_RATE)).toFixed(0)}</p>
+                    <span className={`badge-${b.status}`}>{b.status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {view==='admin-orders'&&(
+          <>
+            <h2 className="text-3xl font-black mb-6" style={{fontFamily:'Syne,sans-serif'}}>All Orders</h2>
+            <div className="bg-white rounded-2xl p-4 mb-4 border-2 border-gray-100 flex gap-4 flex-col md:flex-row">
+              <input value={search} onChange={e=>{setSearch(e.target.value);loadAllBookings(e.target.value,statusFilter);}} className="inp flex-1" placeholder="Search by name or email..."/>
+              <select value={statusFilter} onChange={e=>{setStatusFilter(e.target.value);loadAllBookings(search,e.target.value);}} className="inp md:w-40">
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+            <div className="space-y-3">
+              {allBookings.map(b=>(
+                <div key={b.id} className="bg-white rounded-2xl p-5 border-2 border-gray-100 hover:border-yellow-400 cursor-pointer transition-all flex items-center justify-between" onClick={()=>setSelectedBooking(b)}>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center font-black text-white" style={{background:'var(--blue)'}}>{(b.user_name||'U')[0].toUpperCase()}</div>
+                    <div>
+                      <p className="font-black">{b.user_name}</p>
+                      <p className="text-sm text-gray-500">{b.user_email}</p>
+                      <p className="text-xs text-gray-400">SL-{String(b.id).padStart(6,'0')} • {new Date(b.pickup_date).toLocaleDateString('en-IN')}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-black text-xl text-blue-700" style={{fontFamily:'Syne,sans-serif'}}>₹{(+b.final_amount*(1+GST_RATE)).toFixed(2)}</p>
+                    <p className="text-xs text-gray-400">incl. GST</p>
+                    <span className={`badge-${b.status}`}>{b.status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {view==='admin-students'&&(
+          <>
+            <h2 className="text-3xl font-black mb-6" style={{fontFamily:'Syne,sans-serif'}}>Student Verifications</h2>
+            {!pendingStudents.length?<div className="bg-white rounded-3xl p-16 text-center border-2 border-gray-100"><div className="text-6xl mb-4">🎓</div><p className="text-gray-500">No pending verifications</p></div>:(
+              <div className="grid md:grid-cols-2 gap-6">
+                {pendingStudents.map(s=>(
+                  <div key={s.id} className="bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-yellow-400 transition-all">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-14 h-14 rounded-full flex items-center justify-center font-black text-white text-2xl" style={{background:'var(--blue)'}}>{s.name[0].toUpperCase()}</div>
+                      <div><p className="font-black text-lg" style={{fontFamily:'Syne,sans-serif'}}>{s.name}</p><p className="text-gray-500 text-sm">{s.email}</p><p className="text-xs text-gray-400">{new Date(s.created_at).toLocaleDateString()}</p></div>
+                    </div>
+                    <div className="bg-gray-50 rounded-xl p-4 mb-4">
+                      <p className="text-xs font-bold text-gray-500 mb-1">STUDENT ID</p>
+                      <p className="font-mono text-lg font-black">{s.student_id_number}</p>
+                    </div>
+                    <div className="flex gap-3">
+                      <button onClick={()=>verifyStudent(s.id,true)} className="flex-1 py-3 bg-green-500 text-white rounded-xl font-black hover:bg-green-600">✓ Approve</button>
+                      <button onClick={()=>verifyStudent(s.id,false)} className="flex-1 py-3 bg-red-500 text-white rounded-xl font-black hover:bg-red-600">✗ Reject</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+
+  return null;
+};
+
+ReactDOM.render(<App/>, document.getElementById('root'));
+</script>
+</body>
+</html>
