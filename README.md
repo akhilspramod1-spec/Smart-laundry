@@ -1,8 +1,8 @@
 # 🧺 Smart Laundry Backend (MongoDB Version)
 
-## ✨ No PostgreSQL Required! No Password Headaches!
 
-This version uses **MongoDB** instead of PostgreSQL — much easier to set up!
+
+This version uses **MongoDB**
 
 ---
 
